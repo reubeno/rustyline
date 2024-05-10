@@ -40,7 +40,7 @@ impl Hinter for () {
     type Hint = String;
 }
 
-impl<'r, H: ?Sized + Hinter> Hinter for &'r H {
+impl<'r, H: ?Sized + Hinter> Hinter for &'r mut H {
     type Hint = H::Hint;
 
     fn hint(&self, line: &str, pos: usize, ctx: &Context<'_>) -> Option<Self::Hint> {

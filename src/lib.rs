@@ -85,9 +85,9 @@ fn complete_line<H: Helper>(
         unbounded, Skim, SkimItem, SkimItemReceiver, SkimItemSender, SkimOptionsBuilder,
     };
 
-    let completer = s.helper.unwrap();
     // get a list of completions
-    let (start, candidates) = completer.complete(&s.line, s.line.pos(), &s.ctx)?;
+    let (start, candidates) = s.helper.as_deref_mut().unwrap().complete(&s.line, s.line.pos(), &s.ctx)?;
+
     // if no completions, we are done
     if candidates.is_empty() {
         s.out.beep()?;
@@ -109,6 +109,7 @@ fn complete_line<H: Helper>(
                 } else {
                     Borrowed(candidate)
                 };*/
+                let completer = s.helper.as_deref().unwrap();
                 completer.update(&mut s.line, start, candidate, &mut s.changes);
             } else {
                 // Restore current edited line
@@ -152,6 +153,7 @@ fn complete_line<H: Helper>(
         if let Some(lcp) = longest_common_prefix(&candidates) {
             // if we can extend the item, extend it
             if lcp.len() > s.line.pos() - start || candidates.len() == 1 {
+                let completer = s.helper.as_deref().unwrap();
                 completer.update(&mut s.line, start, lcp, &mut s.changes);
                 s.refresh_line()?;
             }
@@ -551,7 +553,7 @@ where
 
 impl Helper for () {}
 
-impl<'h, H: ?Sized + Helper> Helper for &'h H {}
+impl<'h, H: ?Sized + Helper> Helper for &'h mut H {}
 
 /// Completion/suggestion context
 pub struct Context<'h> {
@@ -695,7 +697,7 @@ impl<H: Helper, I: History> Editor<H, I> {
 
         self.kill_ring.reset(); // TODO recreate a new kill ring vs reset
         let ctx = Context::new(&self.history);
-        let mut s = State::new(&mut stdout, prompt, self.helper.as_ref(), ctx);
+        let mut s = State::new(&mut stdout, prompt, self.helper.as_mut(), ctx);
 
         let mut input_state = InputState::new(&self.config, &self.custom_bindings);
 

@@ -62,7 +62,7 @@ pub trait Highlighter {
 
 impl Highlighter for () {}
 
-impl<'r, H: ?Sized + Highlighter> Highlighter for &'r H {
+impl<'r, H: ?Sized + Highlighter> Highlighter for &'r mut H {
     fn highlight<'l>(&self, line: &'l str, pos: usize) -> Cow<'l, str> {
         (**self).highlight(line, pos)
     }

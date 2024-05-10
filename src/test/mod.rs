@@ -30,7 +30,7 @@ impl Completer for SimpleCompleter {
     type Candidate = String;
 
     fn complete(
-        &self,
+        &mut self,
         line: &str,
         _pos: usize,
         _ctx: &Context<'_>,
@@ -63,8 +63,8 @@ impl Validator for SimpleCompleter {}
 fn complete_line() {
     let mut out = Sink::default();
     let history = crate::history::DefaultHistory::new();
-    let helper = Some(SimpleCompleter);
-    let mut s = init_state(&mut out, "rus", 3, helper.as_ref(), &history);
+    let mut helper = Some(SimpleCompleter);
+    let mut s = init_state(&mut out, "rus", 3, helper.as_mut(), &history);
     let config = Config::default();
     let bindings = Bindings::new();
     let mut input_state = InputState::new(&config, &bindings);
@@ -85,8 +85,8 @@ fn complete_line() {
 fn complete_symbol() {
     let mut out = Sink::default();
     let history = crate::history::DefaultHistory::new();
-    let helper = Some(SimpleCompleter);
-    let mut s = init_state(&mut out, "\\hbar", 5, helper.as_ref(), &history);
+    let mut helper = Some(SimpleCompleter);
+    let mut s = init_state(&mut out, "\\hbar", 5, helper.as_mut(), &history);
     let config = Config::builder()
         .completion_type(CompletionType::List)
         .build();

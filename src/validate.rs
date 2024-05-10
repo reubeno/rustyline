@@ -30,11 +30,11 @@ impl ValidationResult {
 
 /// Give access to user input.
 pub struct ValidationContext<'i> {
-    i: &'i mut dyn Invoke,
+    i: &'i dyn Invoke,
 }
 
 impl<'i> ValidationContext<'i> {
-    pub(crate) fn new(i: &'i mut dyn Invoke) -> Self {
+    pub(crate) fn new(i: &'i dyn Invoke) -> Self {
         ValidationContext { i }
     }
 
@@ -88,7 +88,7 @@ pub trait Validator {
 
 impl Validator for () {}
 
-impl<'v, V: ?Sized + Validator> Validator for &'v V {
+impl<'v, V: ?Sized + Validator> Validator for &'v mut V {
     fn validate(&self, ctx: &mut ValidationContext) -> Result<ValidationResult> {
         (**self).validate(ctx)
     }

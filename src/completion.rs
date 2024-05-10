@@ -90,7 +90,7 @@ pub trait Completer {
     ///
     /// ("ls /usr/loc", 11) => Ok((3, vec!["/usr/local/"]))
     fn complete(
-        &self, // FIXME should be `&mut self`
+        &mut self,
         line: &str,
         pos: usize,
         ctx: &Context<'_>,
@@ -113,11 +113,11 @@ impl Completer for () {
     }
 }
 
-impl<'c, C: ?Sized + Completer> Completer for &'c C {
+impl<'c, C: ?Sized + Completer> Completer for &'c mut C {
     type Candidate = C::Candidate;
 
     fn complete(
-        &self,
+        &mut self,
         line: &str,
         pos: usize,
         ctx: &Context<'_>,
@@ -135,7 +135,7 @@ macro_rules! box_completer {
             impl<C: ?Sized + Completer> Completer for $id<C> {
                 type Candidate = C::Candidate;
 
-                fn complete(&self, line: &str, pos: usize, ctx: &Context<'_>) -> Result<(usize, Vec<Self::Candidate>)> {
+                fn complete(&mut self, line: &str, pos: usize, ctx: &Context<'_>) -> Result<(usize, Vec<Self::Candidate>)> {
                     (**self).complete(line, pos, ctx)
                 }
                 fn update(&self, line: &mut LineBuffer, start: usize, elected: &str, cl: &mut Changeset) {
@@ -148,8 +148,8 @@ macro_rules! box_completer {
 
 use crate::undo::Changeset;
 use std::rc::Rc;
-use std::sync::Arc;
-box_completer! { Box Rc Arc }
+// use std::sync::Arc;
+box_completer! { Box /*Rc Arc*/ }
 
 /// A `Completer` for file and folder names.
 pub struct FilenameCompleter {
@@ -257,7 +257,12 @@ impl Default for FilenameCompleter {
 impl Completer for FilenameCompleter {
     type Candidate = Pair;
 
-    fn complete(&self, line: &str, pos: usize, _ctx: &Context<'_>) -> Result<(usize, Vec<Pair>)> {
+    fn complete(
+        &mut self,
+        line: &str,
+        pos: usize,
+        _ctx: &Context<'_>,
+    ) -> Result<(usize, Vec<Pair>)> {
         self.complete_path(line, pos)
     }
 }
